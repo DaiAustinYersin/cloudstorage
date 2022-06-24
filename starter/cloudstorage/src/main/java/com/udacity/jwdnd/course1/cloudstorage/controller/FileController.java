@@ -2,6 +2,9 @@ package com.udacity.jwdnd.course1.cloudstorage.controller;
 
 import com.udacity.jwdnd.course1.cloudstorage.model.dto.FileDTO;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +24,11 @@ public class FileController {
 
     @PostMapping("/save")
     public String save(@ModelAttribute("fileUpload") MultipartFile fileUpload, Model model) throws IOException {
+        System.out.println(fileUpload.getSize());
+        if (fileUpload.getSize() >= 1000000) {
+            model.addAttribute("status", false);
+            return "result";
+        }
         FileDTO dto = new FileDTO(null, fileUpload.getOriginalFilename(), fileUpload.getContentType(), fileUpload.getSize() + "", fileUpload);
         int rowChanged = 0;
         if (dto.getFileId() == null)
