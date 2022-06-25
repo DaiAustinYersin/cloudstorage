@@ -2,10 +2,7 @@ package com.udacity.jwdnd.course1.cloudstorage;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -13,6 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 
 import java.io.File;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CloudStorageApplicationTests {
 
@@ -203,6 +203,203 @@ class CloudStorageApplicationTests {
 
 	}
 
+	@Test
+	public void testAddNote() {
+		doMockSignUp("Large File","Test","LFT","123");
+		doLogIn("LFT", "123");
 
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"nav-notes-tab\"]")));
+
+		WebElement noteBtn = driver.findElement(By.xpath("//*[@id=\"nav-notes-tab\"]"));
+		noteBtn.click();
+
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"nav-notes\"]/button")));
+		WebElement addNote = driver.findElement(By.xpath("//*[@id=\"nav-notes\"]/button"));
+		addNote.click();
+
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title")));
+		WebElement titleBox = driver.findElement(By.id("note-title"));
+		titleBox.sendKeys("Note 1");
+		WebElement descBox = driver.findElement(By.id("note-description"));
+		descBox.sendKeys("Description for note 1");
+
+		WebElement saveBtn = driver.findElement(By.xpath("//*[@id=\"noteModal\"]/div/div/div[3]/button[2]"));
+		saveBtn.click();
+
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/div/div/span/a")));
+		WebElement loginBtn = driver.findElement(By.xpath("/html/body/div/div/span/a"));
+		loginBtn.click();
+
+		WebElement noteBtn2 = driver.findElement(By.xpath("//*[@id=\"nav-notes-tab\"]"));
+		noteBtn2.click();
+
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"userTable\"]/tbody/tr[1]/th")));
+		WebElement titleCol = driver.findElement(By.xpath("//*[@id=\"userTable\"]/tbody/tr[1]/th"));
+		WebElement descCol = driver.findElement(By.xpath("//*[@id=\"userTable\"]/tbody/tr/td[2]"));
+		Assertions.assertEquals(titleCol.getText(), "Note 1");
+		Assertions.assertEquals(descCol.getText(), "Description for note 1");
+	}
+
+	@Test
+	public void testEditNote() {
+		testAddNote();
+
+		WebElement editBtn = driver.findElement(By.xpath("//*[@id=\"userTable\"]/tbody/tr[1]/td[1]/button"));
+		editBtn.click();
+
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("note-title")));
+		WebElement titleBox = driver.findElement(By.id("note-title"));
+		titleBox.sendKeys(" edited");
+		WebElement descBox = driver.findElement(By.id("note-description"));
+		descBox.sendKeys(" edited");
+
+		WebElement saveBtn = driver.findElement(By.xpath("//*[@id=\"noteModal\"]/div/div/div[3]/button[2]"));
+		saveBtn.click();
+
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/div/div/span/a")));
+		WebElement loginBtn = driver.findElement(By.xpath("/html/body/div/div/span/a"));
+		loginBtn.click();
+
+		WebElement noteBtn2 = driver.findElement(By.xpath("//*[@id=\"nav-notes-tab\"]"));
+		noteBtn2.click();
+
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"userTable\"]/tbody/tr[1]/th")));
+		WebElement titleCol = driver.findElement(By.xpath("//*[@id=\"userTable\"]/tbody/tr[1]/th"));
+		WebElement descCol = driver.findElement(By.xpath("//*[@id=\"userTable\"]/tbody/tr/td[2]"));
+		Assertions.assertEquals(titleCol.getText(), "Note 1 edited");
+		Assertions.assertEquals(descCol.getText(), "Description for note 1 edited");
+	}
+
+	@Test
+	public void testDeleteNote() {
+		testAddNote();
+
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+
+		WebElement delBtn = driver.findElement(By.xpath("//*[@id=\"userTable\"]/tbody/tr[1]/td[1]/a"));
+		delBtn.click();
+
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/div/div/span/a")));
+		WebElement loginBtn = driver.findElement(By.xpath("/html/body/div/div/span/a"));
+		loginBtn.click();
+
+		WebElement noteBtn2 = driver.findElement(By.xpath("//*[@id=\"nav-notes-tab\"]"));
+		noteBtn2.click();
+
+		Exception exception = assertThrows(NoSuchElementException.class, () -> {
+			WebElement titleCol = driver.findElement(By.xpath("//*[@id=\"userTable\"]/tbody/tr[1]/th"));
+			WebElement descCol = driver.findElement(By.xpath("//*[@id=\"userTable\"]/tbody/tr/td[2]"));
+		});
+
+	}
+
+	@Test
+	public void testAddCredentials() {
+		doMockSignUp("Large File","Test","LFT","123");
+		doLogIn("LFT", "123");
+
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"nav-credentials-tab\"]")));
+
+		WebElement noteBtn = driver.findElement(By.xpath("//*[@id=\"nav-credentials-tab\"]"));
+		noteBtn.click();
+
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"nav-credentials\"]/button")));
+		WebElement addNote = driver.findElement(By.xpath("//*[@id=\"nav-credentials\"]/button"));
+		addNote.click();
+
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-url")));
+		WebElement urlBox = driver.findElement(By.id("credential-url"));
+		urlBox.sendKeys("https://www.youtube.com/");
+		WebElement usernameBox = driver.findElement(By.id("credential-username"));
+		usernameBox.sendKeys("dainn4");
+		WebElement passBox = driver.findElement(By.id("credential-password"));
+		passBox.sendKeys("123");
+
+		WebElement saveBtn = driver.findElement(By.xpath("//*[@id=\"credentialModal\"]/div/div/div[3]/button[2]"));
+		saveBtn.click();
+
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/div/div/span/a")));
+		WebElement loginBtn = driver.findElement(By.xpath("/html/body/div/div/span/a"));
+		loginBtn.click();
+
+		WebElement noteBtn2 = driver.findElement(By.xpath("//*[@id=\"nav-credentials-tab\"]"));
+		noteBtn2.click();
+
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr/th")));
+		WebElement urlCol = driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr/th"));
+		WebElement usernameCol = driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr/td[2]"));
+		WebElement passwordCol = driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr/td[3]"));
+		Assertions.assertEquals(urlCol.getText(), "https://www.youtube.com/");
+		Assertions.assertEquals(usernameCol.getText(), "dainn4");
+		Assertions.assertNotEquals(passwordCol.getText(), "123");
+	}
+
+	@Test
+	public void testEditCredentials() {
+		testAddCredentials();
+
+		WebElement editBtn = driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr/td[1]/button"));
+		editBtn.click();
+
+		WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+		webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.id("credential-url")));
+
+        WebElement urlBox = driver.findElement(By.id("credential-url"));
+        WebElement descBox = driver.findElement(By.id("credential-username"));
+        WebElement passBox = driver.findElement(By.id("credential-password"));
+
+        String initPass = passBox.getText();
+
+		urlBox.sendKeys("demo");
+		descBox.clear();
+		descBox.sendKeys("dainnph13993@fpt.edu.vn");
+		passBox.clear();
+		passBox.sendKeys("123456");
+
+        WebElement saveBtn = driver.findElement(By.xpath("//*[@id=\"credentialModal\"]/div/div/div[3]/button[2]"));
+        saveBtn.click();
+
+        webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/div/div/span/a")));
+        WebElement loginBtn = driver.findElement(By.xpath("/html/body/div/div/span/a"));
+        loginBtn.click();
+
+        WebElement noteBtn2 = driver.findElement(By.xpath("//*[@id=\"nav-credentials-tab\"]"));
+        noteBtn2.click();
+
+        webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr/th")));
+        WebElement urlCol = driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr/th"));
+        WebElement usernameCol = driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr/td[2]"));
+        WebElement passwordCol = driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr/td[3]"));
+        Assertions.assertEquals(urlCol.getText(), "https://www.youtube.com/demo");
+        Assertions.assertEquals(usernameCol.getText(), "dainnph13993@fpt.edu.vn");
+        Assertions.assertNotEquals(passwordCol.getText(), "123456");
+        Assertions.assertNotEquals(passwordCol.getText(), initPass);
+	}
+
+    @Test
+    public void testDeleteCredentials() {
+        testAddCredentials();
+
+        WebDriverWait webDriverWait = new WebDriverWait(driver, 2);
+
+        WebElement delBtn = driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr/td[1]/a"));
+        delBtn.click();
+
+        webDriverWait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("/html/body/div/div/span/a")));
+        WebElement homeBtn = driver.findElement(By.xpath("/html/body/div/div/span/a"));
+        homeBtn.click();
+
+        WebElement noteBtn2 = driver.findElement(By.xpath("//*[@id=\"nav-credentials-tab\"]"));
+        noteBtn2.click();
+
+        assertThrows(NoSuchElementException.class, () -> {
+            driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr/th"));
+            driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr/td[2]"));
+            driver.findElement(By.xpath("//*[@id=\"credentialTable\"]/tbody/tr/td[3]"));
+        });
+    }
 
 }
